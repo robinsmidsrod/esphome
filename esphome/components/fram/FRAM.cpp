@@ -204,10 +204,9 @@ uint16_t Fram::get_metadata_(uint8_t field) {
   }
 
   uint8_t addr = this->address_ << 1;
-  this->bus_->write(FRAM_SEC_ADDR, &addr, 1, false);
-
   uint8_t data[3] = {0, 0, 0};
-  i2c::ErrorCode err = this->bus_->read(FRAM_SEC_ADDR, data, 3);
+  i2c::ErrorCode err = this->bus_->write_readv(FRAM_SEC_ADDR, &addr, 1, data, 3);
+
   if (err != i2c::ERROR_OK) {
     return 0;
   }
@@ -247,8 +246,7 @@ void Fram::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
 
 void Fram::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
   uint8_t maddr[] = {(uint8_t) (memaddr >> 8), (uint8_t) (memaddr & 0xFF)};
-  this->bus_->write(this->address_, maddr, 2, false);
-  this->bus_->read(this->address_, obj, size);
+  this->bus_->write_readv(this->address_, maddr, 2, obj, size);
 }
 
 void Fram17::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
@@ -277,8 +275,7 @@ void Fram17::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
   }
 
   uint8_t maddr[] = {(uint8_t) (memaddr >> 8), (uint8_t) (memaddr & 0xFF)};
-  this->bus_->write(this->address_, maddr, 2, false);
-  this->bus_->read(addr, obj, size);
+  this->bus_->write_readv(this->address_, maddr, 2, obj, size);
 }
 
 void Fram11::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
@@ -301,8 +298,7 @@ void Fram11::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
   uint8_t device_addr_with_page_bits = this->address_ | ((memaddr & 0x0700) >> 8);
   uint8_t maddr = memaddr & 0xFF;
 
-  this->bus_->write(device_addr_with_page_bits, &maddr, 1, false);
-  this->bus_->read(device_addr_with_page_bits, obj, size);
+  this->bus_->write_readv(device_addr_with_page_bits, &maddr, 1, obj, size);
 }
 
 void Fram9::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
@@ -325,8 +321,7 @@ void Fram9::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
   uint8_t device_addr_with_page_bits = this->address_ | ((memaddr & 0x0100) >> 8);
   uint8_t maddr = memaddr & 0xFF;
 
-  this->bus_->write(device_addr_with_page_bits, &maddr, 1, false);
-  this->bus_->read(device_addr_with_page_bits, obj, size);
+  this->bus_->write_readv(device_addr_with_page_bits, &maddr, 1, obj, size);
 }
 
 }  // namespace fram

@@ -279,6 +279,15 @@ void RC522::pcd_reset_() {
     return;
 
   if (reset_count_ == RESET_COUNT) {
+    // First set the resetPowerDownPin as digital input, to check the MFRC522 power down mode.
+    if (reset_pin_ != nullptr) {
+      ESP_LOGI(TAG, "Hard reset...");
+      reset_pin_->pin_mode(gpio::FLAG_OUTPUT);  // Now set the resetPowerDownPin as digital output.
+      reset_pin_->digital_write(false);         // Make sure we have a clean LOW state.
+      delayMicroseconds(2);             // 8.8.1 Reset timing requirements says about 100ns. Let us be generous: 2μsl
+      reset_pin_->digital_write(true);  // Exit power down mode. This triggers a hard reset.
+      delayMicroseconds(100);
+    }
     ESP_LOGI(TAG, "Soft reset");
     // Issue the SoftReset command.
     pcd_write_register(COMMAND_REG, PCD_SOFT_RESET);

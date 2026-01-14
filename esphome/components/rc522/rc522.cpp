@@ -279,6 +279,7 @@ void RC522::pcd_reset_() {
     return;
 
   if (reset_count_ == RESET_COUNT) {
+    ESP_LOGI(TAG, "About to hard reset (if possible)...");
     // First set the resetPowerDownPin as digital input, to check the MFRC522 power down mode.
     if (reset_pin_ != nullptr) {
       ESP_LOGI(TAG, "Hard reset...");

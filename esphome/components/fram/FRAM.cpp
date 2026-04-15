@@ -232,6 +232,7 @@ uint16_t Fram::get_metadata_(uint8_t field) {
   return 0;
 }
 
+/*
 void Fram::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   i2c::WriteBuffer buff[2];
   uint8_t maddr[] = {(uint8_t) (memaddr >> 8), (uint8_t) (memaddr & 0xFF)};
@@ -243,12 +244,19 @@ void Fram::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
 
   this->bus_->writev(this->address_, buff, 2, true);
 }
+*/
+
+void Fram::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
+  uint16_t maddr = memaddr; // we cross our fingers that endian matches
+  this->bus_->write_register16(maddr, obj, size);
+}
 
 void Fram::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
   uint8_t maddr[] = {(uint8_t) (memaddr >> 8), (uint8_t) (memaddr & 0xFF)};
   this->bus_->write_readv(this->address_, maddr, 2, obj, size);
 }
 
+/*
 void Fram17::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   uint8_t addr = this->address_;
 
@@ -266,6 +274,20 @@ void Fram17::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
 
   this->bus_->writev(addr, buff, 2, true);
 }
+*/
+
+void Fram17::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
+  uint16_t maddr = memaddr; // we cross our fingers that endian matches
+
+  if (memaddr & 0x00010000) {
+    this->bus_->set_i2c_address(this->address + 1);
+  }
+  else {
+    this->bus_->set_i2caddress(this->address + 1);
+  }
+
+  this->bus_->write_register16(maddr, obj, size);
+}
 
 void Fram17::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
   uint8_t addr = this->address_;
@@ -278,6 +300,7 @@ void Fram17::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
   this->bus_->write_readv(this->address_, maddr, 2, obj, size);
 }
 
+/*
 void Fram11::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   // Device uses Address Pages
   uint8_t device_addr_with_page_bits = this->address_ | ((memaddr & 0x0700) >> 8);
@@ -292,6 +315,15 @@ void Fram11::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
 
   this->bus_->writev(device_addr_with_page_bits, buff, 2, true);
 }
+*/
+
+void Fram11::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
+  // Device uses Address Pages
+  this->bus_->set_i2c_address(this->address | ((memaddr & 0x0700) >> 8));
+  uint8_t maddr = memaddr;
+
+  this->bus_->write_register(maddr, obj, size);
+}
 
 void Fram11::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
   // Device uses Address Pages
@@ -301,6 +333,7 @@ void Fram11::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
   this->bus_->write_readv(device_addr_with_page_bits, &maddr, 1, obj, size);
 }
 
+/*
 void Fram9::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   // Device uses Address Pages
   uint8_t device_addr_with_page_bits = this->address_ | ((memaddr & 0x0100) >> 8);
@@ -314,6 +347,14 @@ void Fram9::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   buff[1].len = size;
 
   this->bus_->writev(device_addr_with_page_bits, buff, 2, true);
+}
+*/
+
+void Fram9::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
+  // Device uses Address Pages
+  this->bus_->set_i2c_address(this->address_ | ((memaddr & 0x0100) >> 8));
+
+  this->bus_->write_register(maddr, obj, size);
 }
 
 void Fram9::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {

@@ -248,7 +248,7 @@ void Fram::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
 
 void Fram::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   uint16_t maddr = memaddr; // we cross our fingers that endian matches
-  this->bus_->write_register16(maddr, obj, size);
+  write_register16(maddr, obj, size);
 }
 
 void Fram::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
@@ -280,10 +280,10 @@ void Fram17::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   uint16_t maddr = memaddr; // we cross our fingers that endian matches
 
   if (memaddr & 0x00010000) {
-    this->bus_->set_i2c_address(this->address + 1);
+    set_i2c_address(this->address_ + 1);
   }
   else {
-    this->bus_->set_i2caddress(this->address + 1);
+    set_i2c_address(this->address_);
   }
 
   this->bus_->write_register16(maddr, obj, size);
@@ -319,10 +319,10 @@ void Fram11::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
 
 void Fram11::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   // Device uses Address Pages
-  this->bus_->set_i2c_address(this->address | ((memaddr & 0x0700) >> 8));
+  set_i2c_address(this->address_ | ((memaddr & 0x0700) >> 8));
   uint8_t maddr = memaddr;
 
-  this->bus_->write_register(maddr, obj, size);
+  write_register(maddr, obj, size);
 }
 
 void Fram11::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
@@ -352,9 +352,9 @@ void Fram9::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
 
 void Fram9::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   // Device uses Address Pages
-  this->bus_->set_i2c_address(this->address_ | ((memaddr & 0x0100) >> 8));
+  set_i2c_address(this->address_ | ((memaddr & 0x0100) >> 8));
 
-  this->bus_->write_register(maddr, obj, size);
+  write_register(maddr, obj, size);
 }
 
 void Fram9::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {

@@ -286,7 +286,7 @@ void Fram17::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
     set_i2c_address(this->address_);
   }
 
-  this->bus_->write_register16(maddr, obj, size);
+  write_register16(maddr, obj, size);
 }
 
 void Fram17::read_block(uint32_t memaddr, uint8_t *obj, uint8_t size) {
@@ -353,6 +353,7 @@ void Fram9::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
 void Fram9::write_block(uint32_t memaddr, const uint8_t *obj, uint8_t size) {
   // Device uses Address Pages
   set_i2c_address(this->address_ | ((memaddr & 0x0100) >> 8));
+  uint8_t maddr = memaddr; // we cross our fingers that endian matches
 
   write_register(maddr, obj, size);
 }
